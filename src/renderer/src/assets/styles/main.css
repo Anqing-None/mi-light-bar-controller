@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-width: 576px;
+  height: 100vh;
+  background-color: #fff;
+}
+
+.dark body {
+  background-color: #262626;
+}
+
+.dark #app {
+  background-color: #262626;
+}
