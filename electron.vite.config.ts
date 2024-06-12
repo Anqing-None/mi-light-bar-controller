@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import vue from '@vitejs/plugin-vue';
 import AutoImport from 'unplugin-auto-import/vite';
-import ElementPlus from 'unplugin-element-plus/vite'
+import ElementPlus from 'unplugin-element-plus/vite';
 
 export default defineConfig({
   main: {
@@ -23,7 +23,7 @@ export default defineConfig({
       AutoImport({
         imports: ['vue'],
       }),
-      ElementPlus(),
+      ElementPlus({}),
     ],
   },
 });

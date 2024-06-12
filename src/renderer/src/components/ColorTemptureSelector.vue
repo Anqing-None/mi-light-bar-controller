@@ -35,12 +35,12 @@ function init() {
   const k6500 = colorTemperatureToRGB(6500);
 
   // 画布对角线的长度
-  const diagonalLength = Math.sqrt(300 * 300 + 300 * 300);
+  const diagonalLength = Math.sqrt(width * width + height * height);
 
-  for (let i = 0; i < 300; i++) {
-    for (let j = 0; j < 300; j++) {
+  for (let i = 0; i < width; i++) {
+    for (let j = 0; j < height; j++) {
       const dx = i;
-      const dy = 300 - j;
+      const dy = height - j;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const ratio = distance / diagonalLength;
       const color = lerpColor(k2700, k6500, ratio);
@@ -51,26 +51,24 @@ function init() {
 }
 
 function handleMouseDown(e: MouseEvent) {
-  const { clientX: startX, clientY: startY } = e;
-
-  const startCircleSelectorX = circleSelectorPos.x;
-  const startCircleSelectorY = circleSelectorPos.y;
+  const { clientX: startClientX, clientY: startClientY } = e;
+  const { x: startCircleSelectorX, y: startCircleSelectorY } = circleSelectorPos;
 
   const onMove = (ev: MouseEvent) => {
     const { clientX, clientY } = ev;
-    const dx = clientX - startX;
-    const dy = clientY - startY;
+    const dx = clientX - startClientX;
+    const dy = clientY - startClientY;
     circleSelectorPos.x = startCircleSelectorX + dx;
     circleSelectorPos.y = startCircleSelectorY + dy;
   };
 
-  const onMoveEnd = () => {
+  const onMouseUp = () => {
     document.removeEventListener('mousemove', onMove);
-    document.removeEventListener('mouseup', onMoveEnd);
+    document.removeEventListener('mouseup', onMouseUp);
   };
 
   document.addEventListener('mousemove', onMove);
-  document.addEventListener('mouseup', onMoveEnd);
+  document.addEventListener('mouseup', onMouseUp);
 }
 
 onMounted(() => init());

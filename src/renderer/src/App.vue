@@ -95,7 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { ElInputNumber } from 'element-plus';
 import { watchDebounced } from '@vueuse/core';
 import IconsMi from '@/components/icons/Mi.vue';
@@ -134,5 +134,3 @@ watchDebounced(
 
 const range = [2700, 4600, 6500];
 </script>
-
-<style scoped></style>

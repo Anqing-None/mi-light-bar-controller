@@ -24,30 +24,30 @@ export function colorTemperatureToRGB(kelvin: number) {
   const g = Math.round(clamp(green, 0, 255));
   const b = Math.round(clamp(blue, 0, 255));
 
-  return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+  const hex = `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+
+  const K = RGBToColorTemperature(hex);
+
+  console.log(`inputK: ${kelvin}, parsedK: ${K}`);
+
+  return hex;
 }
 
 export function RGBToColorTemperature(hex: string): number {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+  const red = parseInt(hex.slice(1, 3), 16);
+  const green = parseInt(hex.slice(3, 5), 16);
+  const blue = parseInt(hex.slice(5, 7), 16);
+  let retK = 0;
 
-  const epsilon = 0.4;
-  let minTemp = 1000;
-  let maxTemp = 40000;
-  while (maxTemp - minTemp > epsilon) {
-    const temp = (maxTemp + minTemp) / 2;
-    const rgb = colorTemperatureToRGB(temp);
-    if (rgb.r - r < epsilon && rgb.g - g < epsilon && rgb.b - b < epsilon) {
-      return temp;
-    }
-    if (rgb.r > r) {
-      maxTemp = temp;
-    } else {
-      minTemp = temp;
-    }
+  if (red === 255) {
+    const K = Math.round(Math.pow(Math.E, (green + 161.1195681661) / 99.4708025861));
+    retK = K;
+  } else if (blue === 255) {
+    const K = Math.round(Math.pow(red / 329.698727446, 1 / -0.1332047592) + 60);
+    retK = K;
   }
-  return (maxTemp + minTemp) / 2;
+
+  return retK * 100;
 }
 
 export function clamp(x: number, min: number, max: number) {
