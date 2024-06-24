@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
+import Yeelight from './Yeelight';
 
 function createWindow(): void {
   // Create the browser window.
@@ -53,8 +54,8 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.handle('ping', () => console.log('pong'));
-  ipcMain.handle('turn-on', () => console.log('on'));
-  ipcMain.handle('turn-off', () => console.log('off'));
+  ipcMain.handle('turn-on', () => turn('on'));
+  ipcMain.handle('turn-off', () => turn('off'));
   ipcMain.handle('set-lightness', (_, v) => console.log('set-lightness', v));
   ipcMain.handle('set-color-temp', (_, v) => console.log('set-color-temp', v));
 
@@ -78,3 +79,13 @@ app.on('window-all-closed', () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+async function turn(state: 'on' | 'off') {
+  const mi = new Yeelight('192.168.31.136', '31ccfa2755a639cb3a8a6779853569b2');
+
+  const res = await mi.hello();
+
+  if (res) {
+    mi.turn(state);
+  }
+}
