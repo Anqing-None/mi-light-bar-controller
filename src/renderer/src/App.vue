@@ -37,19 +37,7 @@
         </div>
       </div>
       <!-- temperature card -->
-      <div class="card w-[28rem] bg-base-100 shadow-xl">
-        <div class="card-body">
-          <h2 class="card-title">
-            色温调节
-            <ElInputNumber class="w-4 inline-block" v-model="colorTemperature" :min="2700" :max="6500" :step="100" controls-position="right" />
-            K
-          </h2>
-          <div class="mt-2">
-            <ColorTemptureSelector />
-            <!-- <input class="range range-primary" type="range" min="0" max="100" v-model="lightness" /> -->
-          </div>
-        </div>
-      </div>
+      <TemperatureCard class="card w-[28rem] bg-base-100 shadow-xl" v-model:temperature="colorTemperature" />
       <!-- mode card -->
       <div class="card w-[28rem] bg-base-100 shadow-xl">
         <div class="card-body">
@@ -96,16 +84,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { ElInputNumber } from 'element-plus';
 import { watchDebounced } from '@vueuse/core';
 import IconsMi from '@/components/icons/Mi.vue';
 import ThemeButton from '@/components/ThemeButton.vue';
-import ColorTemptureSelector from '@/components/ColorTemptureSelector.vue';
+import TemperatureCard from './components/TemperatureCard.vue';
 const { turnOn, turnOff, setLightness, setColorTemp } = window.api;
 
 const lightIsON = ref(false);
 const lightness = ref(40);
-const colorTemperature = ref(40);
+const colorTemperature = ref(2700);
 
 watchDebounced(
   lightIsON,
@@ -126,11 +113,8 @@ watchDebounced(
 watchDebounced(
   colorTemperature,
   (value) => {
-    console.log(value);
     setColorTemp(value);
   },
   { debounce: 300 },
 );
-
-const range = [2700, 4600, 6500];
 </script>
