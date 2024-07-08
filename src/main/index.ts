@@ -3,6 +3,7 @@ import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import Yeelight from './Yeelight';
+import MiLogin from './MiLogin';
 
 function createWindow(): void {
   // Create the browser window.
@@ -58,6 +59,12 @@ app.whenReady().then(() => {
   ipcMain.handle('turn-off', () => turn('off'));
   ipcMain.handle('set-lightness', (_, v) => console.log('set-lightness', v));
   ipcMain.handle('set-color-temp', (_, v) => console.log('set-color-temp', v));
+  ipcMain.handle('get-login-url', () => getLoginUrl());
+  ipcMain.handle('test-connection', async (event, IP, token) => {
+    const mi = new Yeelight(IP, token);
+    console.log('test-connection', IP, token);
+    return await mi.hello();
+  });
 
   createWindow();
 
@@ -88,4 +95,10 @@ async function turn(state: 'on' | 'off') {
   if (res) {
     mi.turn(state);
   }
+}
+
+async function getLoginUrl() {
+  const miaccount = new MiLogin();
+  await miaccount.getSign();
+  return await miaccount.getQRCode();
 }

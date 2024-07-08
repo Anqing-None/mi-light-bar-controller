@@ -8,6 +8,8 @@ const api = {
   turnOff: () => ipcRenderer.invoke('turn-off'),
   setLightness: (value) => ipcRenderer.invoke('set-lightness', value),
   setColorTemp: (value) => ipcRenderer.invoke('set-color-temp', value),
+  getLoginUrl: () => ipcRenderer.invoke('get-login-url'),
+  testConnection: (IP: string, token: string) => ipcRenderer.invoke('test-connection', IP, token),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

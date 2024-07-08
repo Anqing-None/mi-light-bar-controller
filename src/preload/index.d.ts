@@ -9,6 +9,9 @@ declare global {
       ping: () => Promise<void>;
       setLightness: (value: number) => Promise<void>;
       setColorTemp: (value: number) => Promise<void>;
+      getLoginUrl: () => Promise<string>;
+      testConnection: (IP: string, token: string) => boolean;
+      getInitState: () => Promise<{ power: string; lightness: number; colorTemperature: number }>;
     };
   }
 }

@@ -69,7 +69,7 @@ class Yeelight {
     return await this.sendMessageAndWaitResponse(helloBuffer, 54321, this.ip);
   }
 
-  async turn(state: 'on' | 'off') {
+  async sendCommand(command) {
     /**
      * miio协议
      * https://github.com/OpenMiHome/mihome-binary-protocol/blob/master/doc/PROTOCOL.md
@@ -89,12 +89,6 @@ class Yeelight {
       header[i] = 0xff;
     }
 
-    const command = {
-      id: 1,
-      method: 'set_power',
-      params: [state],
-    };
-
     const commandBuffer = Buffer.from(JSON.stringify(command));
     const cipher = this.cipher;
     const encrypted = Buffer.concat([cipher.update(commandBuffer), cipher.final()]);
@@ -112,8 +106,28 @@ class Yeelight {
     return await this.send(newPacket, 54321, this.ip);
   }
 
+  async getInitState() {
+    const command = {
+      id: 1,
+      method: 'set_power',
+      params: ['power', 'bright', 'CT'],
+    };
+
+    return await this.sendCommand(command);
+  }
+
+  async turn(state: 'on' | 'off') {
+    const command = {
+      id: 1,
+      method: 'set_power',
+      params: [state],
+    };
+
+    return await this.sendCommand(command);
+  }
+
   handleMessage(msg: Buffer, remoteInfo: dgram.RemoteInfo) {
-    console.log('get message from ', remoteInfo.address, remoteInfo.port, msg.toString());
+    // console.log('get message from ', remoteInfo.address, remoteInfo.port, msg.toString());
     const buf = Buffer.from(msg);
     const header = Buffer.from(msg);
     const deviceId = header.readUInt32BE(8);
@@ -121,6 +135,16 @@ class Yeelight {
 
     this.deviceId = deviceId;
     this.stamp = stamp;
+    console.log(msg.toString('hex'));
+
+    if (msg.length !== 32) {
+      const decipher = this.decipher;
+      const decrypted = Buffer.concat([decipher.update(buf.slice(32)), decipher.final()]);
+      console.log(decrypted.toString());
+      const resObj = JSON.parse(decrypted.toString());
+      const result = resObj.result;
+      console.log(result);
+    }
   }
 
   async send(buf: Buffer, port: number, ip: string) {
