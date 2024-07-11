@@ -8,10 +8,10 @@ import MiLogin from './MiLogin';
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 620,
-    height: 860,
-    minWidth: 620,
-    minHeight: 860,
+    width: 850,
+    height: 550,
+    minWidth: 768,
+    minHeight: 520,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),

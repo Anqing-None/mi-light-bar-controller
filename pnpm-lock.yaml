@@ -32,6 +32,9 @@ importers:
       element-plus:
         specifier: ^2.7.5
         version: 2.7.5(vue@3.4.27(typescript@5.4.5))
+      gridstack:
+        specifier: ^10.3.0
+        version: 10.3.0
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
@@ -1853,6 +1856,9 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  gridstack@10.3.0:
+    resolution: {integrity: sha512-eGKsmU2TppV4coyDu9IIdIkm4qjgLLdjlEOFwQyQMuSwfOpzSfLdPc8du0HuebGr7CvAIrJxN4lBOmGrWSBg9g==}
 
   has-flag@3.0.0:
     resolution: {integrity: sha512-sKJf1+ceQBr4SMkvQnBDNDtf4TXpVhVGateu0t918bl30FnbE2m4vNLX+VWe/dpjlb+HugGYzW7uQXH98HPEYw==}
@@ -4960,6 +4966,8 @@ snapshots:
   graceful-fs@4.2.11: {}
 
   graphemer@1.4.0: {}
+
+  gridstack@10.3.0: {}
 
   has-flag@3.0.0: {}
 

@@ -1,6 +1,6 @@
 <template>
   <div class="dropdown dropdown-end">
-    <div tabindex="0" role="button" class="btn m-1 flex justify-center items-center">
+    <div tabindex="0" role="button" class="btn btn-sm m-1 flex justify-center items-center">
       <component :class="themeIconClass" :is="themeIconsDict[theme]"></component>
       主题
     </div>

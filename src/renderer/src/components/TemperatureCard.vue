@@ -1,16 +1,12 @@
 <template>
-  <div class="card w-[28rem] bg-base-100 shadow-xl">
-    <div class="card-body">
-      <h2 class="card-title">
-        色温调节
-        <ElInputNumber class="w-4 inline-block" v-model="temperature" :min="2700" :max="6500" :step="100" controls-position="right" />
-        K
-      </h2>
-      <div class="mt-2">
-        <div ref="container" class="relative" :style="{ width: `${width}px`, height: `${height}px` }" @click="handleClick">
-          <div class="absolute border-2 border-primary cursor-pointer" :style="sliderSelectorStyle" @mousedown="handleMouseDown"></div>
-        </div>
-      </div>
+  <div class="w-full h-full flex flex-col gap-2 justify-center items-center bg-gray-100 dark:bg-neutral-800 rounded-lg">
+    <h2 class="w-4/5 flex gap-2 items-center text-xl leading-7 font-bold text-left">
+      色温调节
+      <ElInputNumber class="w-4 inline-block" v-model="temperature" :min="2700" :max="6500" :step="100" controls-position="right" />
+      K
+    </h2>
+    <div ref="container" class="w-4/5 relative" :style="{ width: `${width}px`, height: `${height}px` }" @click="handleClick">
+      <div class="absolute border-2 border-primary cursor-pointer hover:scale-105 transition-transform" :style="sliderSelectorStyle" @mousedown.stop="handleMouseDown"></div>
     </div>
   </div>
 </template>

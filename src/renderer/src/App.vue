@@ -1,40 +1,32 @@
 <template>
-  <div class="h-full mx-auto pt-12 px-6 max-w-screen-lg flex flex-col items-center gap-4">
-    <div role="alert" class="alert alert-error">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span>未连接到显示器挂灯，请查看配置是否正确。</span>
-      <button @click="configModalRef.showModal()" class="btn btn-xs">配置</button>
-    </div>
-    <!-- <img :src="qrcode" alt="QR Code" /> -->
-    <header class="flex justify-center items-center">
-      <div class="tooltip" :data-tip="connectState ? '已连接' : '未连接'">
-        <IconsMi @click="checkConnection" class="w-6 h-6 mr-2 cursor-pointer" :style="{ filter: connectState ? '' : 'grayscale(1)' }" />
-      </div>
-      <h1 class="text-xl">
-        <span>米家显示器挂灯1S PC 控制器 </span>
-        <span class="text-xs align-bottom italic">v 1.0.0</span>
-      </h1>
-      <ThemeButton class="ml-8" />
-    </header>
-    <main class="flex flex-col gap-4">
-      <!-- lightness card -->
-      <div class="card w-[28rem] bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="flex items-center gap-2 mb-2">
-            <span class="card-title">开关</span>
+  <div class="py-4">
+    <Header></Header>
+    <div class="grid-stack p-2">
+      <!-- power card -->
+      <div class="grid-stack-item" gs-w="2" gs-h="2" gs-x="0" gs-y="0">
+        <div class="grid-stack-item-content">
+          <div class="w-full h-full flex flex-col gap-2 justify-center items-center bg-gray-100 dark:bg-neutral-800 rounded-lg">
+            <span class="text-xl leading-7 font-bold">开关</span>
             <input type="checkbox" class="toggle toggle-success" checked v-model="lightIsON" />
           </div>
-          <h2 class="card-title">
-            亮度 <span>{{ lightness }}%</span>
-          </h2>
-          <div class="mt-2">
+        </div>
+      </div>
+
+      <!-- lightness card -->
+      <div class="grid-stack-item" gs-w="5" gs-h="2" gs-x="2" gs-y="0">
+        <div class="grid-stack-item-content">
+          <div class="w-full h-full flex flex-col gap-2 justify-center items-center bg-gray-100 dark:bg-neutral-800 rounded-lg">
+            <h2 class="flex gap-2 items-center w-4/5 text-xl leading-7 font-bold text-left">
+              亮度
+              <!-- <span>{{ lightness }}%</span> -->
+              <ElInputNumber class="w-2 inline-block" v-model="lightness" :min="0" :max="100" :step="5" controls-position="right" :disabled="!lightIsON" />
+              %
+            </h2>
             <input
-              class="range"
+              class="range w-4/5"
               :class="{
                 'cursor-not-allowed': !lightIsON,
-                'bg-gray-300': !lightIsON,
+                'bg-gray-100': !lightIsON,
                 'range-primary': lightIsON,
               }"
               type="range"
@@ -46,149 +38,73 @@
           </div>
         </div>
       </div>
+
       <!-- temperature card -->
-      <TemperatureCard class="card w-[28rem] bg-base-100 shadow-xl" v-model:temperature="colorTemperature" />
+      <div class="grid-stack-item" gs-w="7" gs-h="4" gs-x="0" gs-y="2">
+        <div class="grid-stack-item-content">
+          <TemperatureCard v-model:temperature="colorTemperature" />
+        </div>
+      </div>
+
       <!-- mode card -->
-      <div class="card w-[28rem] bg-base-100 shadow-xl">
-        <div class="card-body">
-          <h2 class="card-title">模式切换</h2>
-          <div class="mt-2">
-            <form>
-              <fieldset class="flex gap-2">
-                <input class="btn" id="1" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                <input class="btn" id="2" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                <input class="btn" id="3" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                <input class="btn" id="4" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-              </fieldset>
-            </form>
-          </div>
-        </div>
-      </div>
-      <!-- setting card -->
-      <div class="card w-[28rem] bg-base-100 shadow-xl">
-        <div class="card-body">
-          <div class="mt-2">
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <!-- <span class="label-text">开机时自动打开台灯</span> -->
-                <span class="label-text">台灯跟随电脑开启</span>
-                <input type="checkbox" class="toggle toggle-success" checked />
-              </label>
-            </div>
-          </div>
+      <div class="grid-stack-item" gs-w="5" gs-h="4" gs-x="7" gs-y="0">
+        <div class="grid-stack-item-content">
+          <div class="w-full h-full p-4 flex flex-col gap-2 bg-gray-100 dark:bg-neutral-800 rounded-lg">
+            <h2 class="text-xl leading-7 font-bold text-left">模式切换</h2>
 
-          <div class="mt-2">
-            <div class="form-control">
-              <label class="label cursor-pointer">
-                <!-- <span class="label-text">关机时自动关闭台灯</span> -->
-                <span class="label-text">台灯跟随电脑关闭</span>
-                <input type="checkbox" class="toggle toggle-success" checked />
-              </label>
+            <div>
+              <form>
+                <fieldset class="grid gap-2 grid-cols-2">
+                  <input class="btn bg-base-100" id="1" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
+                  <input class="btn bg-base-100" id="2" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
+                  <input class="btn bg-base-100" id="3" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
+                  <input class="btn bg-base-100" id="4" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
+                </fieldset>
+              </form>
             </div>
           </div>
         </div>
       </div>
-    </main>
 
-    <dialog ref="configModalRef" id="my_modal_3" class="modal">
-      <div class="modal-box">
-        <div class="flex justify-between items-center">
-          <h3 class="text-lg font-bold">连接挂灯</h3>
-          <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost">✕</button>
-          </form>
-        </div>
+      <div class="grid-stack-item" gs-w="5" gs-h="2" gs-x="7" gs-y="4">
+        <div class="grid-stack-item-content">
+          <div class="w-full h-full p-4 flex flex-col items-center bg-gray-100 dark:bg-neutral-800 rounded-lg">
+            <div class="form-control w-full">
+              <label class="label justify-between cursor-pointer">
+                <span class="label-text">跟随电脑开启</span>
+                <input type="checkbox" class="toggle toggle-success" checked />
+              </label>
+            </div>
 
-        <div class="flex-grow flex flex-col pt-4 gap-4">
-          <label for="IP" class="relative px-2 block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600">
-            <input v-model="IP" type="text" id="IP" class="peer w-full h-10 border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0" placeholder="请输入挂灯IP地址" />
-
-            <span
-              class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-base-200 p-0.5 text-xs text-gray-700 dark:text-white transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
-            >
-              挂灯IP地址
-            </span>
-          </label>
-
-          <label for="token" class="relative px-2 block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600">
-            <input v-model="token" type="text" id="token" class="peer w-full h-10 border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0" placeholder="请输入挂灯token地址" />
-
-            <span
-              class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-base-200 p-0.5 text-xs text-gray-700 dark:text-white transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
-            >
-              挂灯token
-            </span>
-          </label>
-        </div>
-
-        <div>
-          若不知道您的设备IP与Token，登陆米家账号获取
-
-        </div>
-
-        <div class="flex justify-end gap-2 mt-5">
-          <div class="btn btn-sm">测试连接</div>
-          <div class="btn btn-primary btn-sm">确认</div>
-        </div>
-      </div>
-
-      <form method="dialog" class="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
-    <div class="absolute left-2 bottom-2 z-10">
-      <div class="drawer">
-        <input id="my-drawer" type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content">
-          <!-- Page content here -->
-          <label for="my-drawer" class="absolute left-2 bottom-2 btn btn-circle btn-xs drawer-button"><IconsSetting class="w-4 h-4 dark:fill-white" /></label>
-        </div>
-        <div class="drawer-side">
-          <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-          <div class="w-2/3 min-h-full flex flex-col p-4 bg-base-200 text-base-content">
-            <h1 class="text-lg font-bold">设置</h1>
-            <div class="flex-grow flex flex-col justify-between">
-              <div class="flex-grow flex flex-col pt-4 gap-4">
-                <label for="IP" class="relative px-2 block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600">
-                  <input v-model="IP" type="text" id="IP" class="peer w-full h-10 border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0" placeholder="请输入挂灯IP地址" />
-
-                  <span
-                    class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-base-200 p-0.5 text-xs text-gray-700 dark:text-white transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
-                  >
-                    挂灯IP地址
-                  </span>
-                </label>
-
-                <label for="token" class="relative px-2 block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600">
-                  <input v-model="token" type="text" id="token" class="peer w-full h-10 border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0" placeholder="请输入挂灯token地址" />
-
-                  <span
-                    class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-base-200 p-0.5 text-xs text-gray-700 dark:text-white transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
-                  >
-                    挂灯token
-                  </span>
-                </label>
-              </div>
-              <div class="flex justify-end gap-2">
-                <div class="btn btn-sm">测试连接</div>
-                <div class="btn btn-primary btn-sm">确认</div>
-              </div>
+            <div class="form-control w-full">
+              <label class="label cursor-pointer">
+                <span class="label-text">跟随电脑关闭</span>
+                <input type="checkbox" class="toggle toggle-success" checked />
+              </label>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <div class="fixed bottom-2 left-0 right-0 text-center text-xs">Made with 🩷 by <a class="text-blue-500" href="https://github.com/Anqing-None" target="_blank">Anqing</a>.</div>
+
+    <div class="fixed w-full h-full top-0 left-0 right-0 bottom-0 bg-black/70 z-10 flex justify-center items-center">
+      <div class="btn" @click="configModalRef.showModal()">连接挂灯后即可使用...</div>
+    </div>
+    <ConfigModal ref="configModalRef"></ConfigModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import 'gridstack/dist/gridstack.min.css';
+import { GridStack } from 'gridstack';
+import { onMounted, ref, provide } from 'vue';
+import { ElInputNumber } from 'element-plus';
 import { useQRCode } from '@vueuse/integrations/useQRCode';
 import { watchDebounced, useLocalStorage } from '@vueuse/core';
-import IconsMi from '@/components/icons/Mi.vue';
-import IconsSetting from '@/components/icons/Setting.vue';
-import ThemeButton from '@/components/ThemeButton.vue';
 import TemperatureCard from './components/TemperatureCard.vue';
+import Header from './components/Header.vue';
+import ConfigModal from './components/ConfigModal.vue';
 const { turnOn, turnOff, setLightness, setColorTemp, testConnection, getInitState, getLoginUrl, loginWithQRCode, loginWithPassword } = window.api;
 
 const configModalRef = ref();
@@ -198,9 +114,11 @@ const colorTemperature = ref(2700);
 const connectState = ref(false);
 const IP = useLocalStorage('IP', '');
 const token = useLocalStorage('token', '');
+const configModalVisible = ref(false);
 
 const qrcodeText = ref('text-to-encode');
 const qrcode = useQRCode(qrcodeText);
+let grid: GridStack | null = null;
 
 watchDebounced(
   lightIsON,
@@ -227,7 +145,7 @@ watchDebounced(
 );
 
 onMounted(async () => {
-  // qrcodeText.value = await getLoginUrl();
+  grid = GridStack.init({ float: true, cellHeight: '70px', minRow: 1 });
 });
 
 async function checkConnection() {
@@ -238,4 +156,12 @@ async function checkConnection() {
 // onMounted(async () => {
 //   await checkConnection();
 // });
+
+provide('app', { connectState, checkConnection });
 </script>
+
+<style scoped>
+.grid-stack > .grid-stack-item > .grid-stack-item-content {
+  overflow: hidden;
+}
+</style>
