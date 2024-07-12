@@ -50,8 +50,8 @@ class Yeelight {
 
     this.socket.bind();
 
-    this.hello().then(() => {
-      this.isActive = true;
+    this.hello().then((res: boolean) => {
+      this.isActive = res;
       console.log('isActive', this.isActive);
     });
   }
@@ -66,7 +66,9 @@ class Yeelight {
       helloBuffer[i] = 0xff;
     }
 
-    return await this.sendMessageAndWaitResponse(helloBuffer, 54321, this.ip);
+    const ret = await this.sendMessageAndWaitResponse(helloBuffer, 54321, this.ip);
+
+    return ret;
   }
 
   async sendCommand(command) {
@@ -159,18 +161,30 @@ class Yeelight {
     });
   }
 
-  async sendMessageAndWaitResponse(buf: Buffer, port: number, ip: string) {
-    const res = await this.send(buf, port, ip);
-    if (res) {
-      return new Promise((resolve, reject) => {
-        this.socket.once('message', (msg, remoteInfo) => {
-          this.handleMessage(msg, remoteInfo);
-          resolve(true);
+  async sendMessageAndWaitResponse(buf: Buffer, port: number, ip: string, timeout: number = 5000) {
+    const sendAndWait = async (): Promise<boolean> => {
+      const res = await this.send(buf, port, ip);
+      if (res) {
+        return new Promise((resolve, _) => {
+          this.socket.once('message', (msg, remoteInfo) => {
+            this.handleMessage(msg, remoteInfo);
+            resolve(true);
+          });
         });
+      } else {
+        return new Promise((resolve, _) => resolve(false));
+      }
+    };
+
+    const timing = (): Promise<boolean> => {
+      return new Promise((resolve, _) => {
+        setTimeout(() => {
+          resolve(false);
+        }, timeout);
       });
-    } else {
-      return new Promise((res, rej) => rej(false));
-    }
+    };
+
+    return await Promise.race([sendAndWait(), timing()]);
   }
 }
 

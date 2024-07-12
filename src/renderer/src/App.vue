@@ -88,7 +88,7 @@
     </div>
     <div class="fixed bottom-2 left-0 right-0 text-center text-xs">Made with 🩷 by <a class="text-blue-500" href="https://github.com/Anqing-None" target="_blank">Anqing</a>.</div>
 
-    <div class="fixed w-full h-full top-0 left-0 right-0 bottom-0 bg-black/70 z-10 flex justify-center items-center">
+    <div v-if="false" class="fixed w-full h-full top-0 left-0 right-0 bottom-0 bg-black/70 z-10 flex justify-center items-center">
       <div class="btn" @click="configModalRef.showModal()">连接挂灯后即可使用...</div>
     </div>
     <ConfigModal ref="configModalRef"></ConfigModal>
@@ -105,15 +105,13 @@ import { watchDebounced, useLocalStorage } from '@vueuse/core';
 import TemperatureCard from './components/TemperatureCard.vue';
 import Header from './components/Header.vue';
 import ConfigModal from './components/ConfigModal.vue';
-const { turnOn, turnOff, setLightness, setColorTemp, testConnection, getInitState, getLoginUrl, loginWithQRCode, loginWithPassword } = window.api;
+const { turnOn, turnOff, setLightness, setColorTemp, testConnection, getInitState, getLoginQRCode, loginWithQRCode, loginWithAccount } = window.api;
 
 const configModalRef = ref();
 const lightIsON = ref(false);
 const lightness = ref(40);
 const colorTemperature = ref(2700);
 const connectState = ref(false);
-const IP = useLocalStorage('IP', '');
-const token = useLocalStorage('token', '');
 const configModalVisible = ref(false);
 
 const qrcodeText = ref('text-to-encode');
@@ -149,15 +147,23 @@ onMounted(async () => {
 });
 
 async function checkConnection() {
-  const res = await testConnection(IP.value, token.value);
+  const IP = localStorage.getItem('IP') || '';
+  const token = localStorage.getItem('token') || '';
+
+  const res = await testConnection(IP, token);
   connectState.value = res;
+  return res;
+}
+
+function openSettingModal() {
+  configModalRef.value.showModal();
 }
 
 // onMounted(async () => {
 //   await checkConnection();
 // });
 
-provide('app', { connectState, checkConnection });
+provide('app', { connectState, checkConnection, loginWithQRCode, openSettingModal, loginWithAccount });
 </script>
 
 <style scoped>

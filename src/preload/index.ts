@@ -8,7 +8,8 @@ const api = {
   turnOff: () => ipcRenderer.invoke('turn-off'),
   setLightness: (value) => ipcRenderer.invoke('set-lightness', value),
   setColorTemp: (value) => ipcRenderer.invoke('set-color-temp', value),
-  getLoginUrl: () => ipcRenderer.invoke('get-login-url'),
+  loginWithQRCode: () => ipcRenderer.invoke('get-login-qrcode'),
+  loginWithAccount: ({ username, password }) => ipcRenderer.invoke('login-with-account', { username, password }),
   testConnection: (IP: string, token: string) => ipcRenderer.invoke('test-connection', IP, token),
 };
 

@@ -59,8 +59,9 @@ app.whenReady().then(() => {
   ipcMain.handle('turn-off', () => turn('off'));
   ipcMain.handle('set-lightness', (_, v) => console.log('set-lightness', v));
   ipcMain.handle('set-color-temp', (_, v) => console.log('set-color-temp', v));
-  ipcMain.handle('get-login-url', () => getLoginUrl());
-  ipcMain.handle('test-connection', async (event, IP, token) => {
+  ipcMain.handle('login-with-qrcode', () => loginWithQRCode());
+  ipcMain.handle('login-with-account', (_, { username, password }) => loginWithAccount({ username, password }));
+  ipcMain.handle('test-connection', async (_, IP, token) => {
     const mi = new Yeelight(IP, token);
     console.log('test-connection', IP, token);
     return await mi.hello();
@@ -97,8 +98,13 @@ async function turn(state: 'on' | 'off') {
   }
 }
 
-async function getLoginUrl() {
+async function loginWithQRCode() {
   const miaccount = new MiLogin();
   await miaccount.getSign();
   return await miaccount.getQRCode();
+}
+
+async function loginWithAccount({ username, password }) {
+  const mi = new MiLogin(username, password);
+  return await mi.getDevicesByAccount();
 }

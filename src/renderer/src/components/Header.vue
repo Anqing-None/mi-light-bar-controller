@@ -11,7 +11,7 @@
     </div>
     <div>
       <ThemeButton class="ml-8" />
-      <div class="btn btn-sm">
+      <div @click="openSettingModal()" class="btn btn-sm">
         <IconsSetting class="w-4 h-4 fill-black dark:fill-white" />
       </div>
     </div>
@@ -24,5 +24,5 @@ import IconsMi from '@/components/icons/Mi.vue';
 import IconsSetting from '@/components/icons/Setting.vue';
 import ThemeButton from '@/components/ThemeButton.vue';
 
-const { connectState, checkConnection } = inject<any>('app');
+const { connectState, checkConnection, openSettingModal } = inject<any>('app');
 </script>

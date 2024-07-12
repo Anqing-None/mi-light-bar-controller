@@ -26,7 +26,12 @@ class MiLogin {
       .join(';');
   }
 
-  constructor() {}
+  constructor(username?: string, password?: string) {
+    if (username && password) {
+      this.username = username;
+      this.password = password;
+    }
+  }
 
   /**
    * step 1: 获取签名
@@ -90,40 +95,6 @@ class MiLogin {
   }
 
   /**
-   * step 3: 登录
-   */
-  async login() {
-    const url = 'https://account.xiaomi.com/pass/serviceLoginAuth2';
-    this.headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    this.headers.set('Cookie', this.getCookieString());
-
-    // 将密码转换为md5
-    const hash = crypto.createHash('md5').update(this.password).digest('hex').toUpperCase();
-    const postBody = new URLSearchParams();
-    postBody.append('sid', 'xiaomiio');
-    postBody.append('hash', hash);
-    postBody.append('callback', 'https://sts.api.io.mi.com/sts');
-    postBody.append('qs', '%3Fsid%3Dxiaomiio%26_json%3Dtrue');
-    postBody.append('user', this.username);
-    postBody.append('_json', 'true');
-    postBody.append('_sign', this.sign);
-
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: this.headers,
-      body: postBody,
-    });
-
-    const text = await res.text();
-
-    const str = text.replace('&&&START&&&', '');
-    const data = JSON.parse(str);
-    const { cUserId, nonce, passToken, ssecurity, userId, location } = data;
-    Object.assign(this, { cUserId, userId, passToken, ssecurity, nonce });
-    this.getServiceToken(location);
-  }
-
-  /**
    * step 3: 监听扫码结果
    * @param url
    */
@@ -174,7 +145,7 @@ class MiLogin {
 
     this.serviceToken = serviceToken;
 
-    this.getDeviceList();
+    // this.getDeviceList();
   }
 
   /**
@@ -226,6 +197,43 @@ class MiLogin {
 
     console.log(data);
     return data.result.list;
+  }
+
+  /**
+   * 使用账号密码获取设备信息
+   */
+  async getDevicesByAccount() {
+    await this.getSign();
+    const url = 'https://account.xiaomi.com/pass/serviceLoginAuth2';
+    this.headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    this.headers.set('Cookie', this.getCookieString());
+
+    // 将密码转换为md5
+    const hash = crypto.createHash('md5').update(this.password).digest('hex').toUpperCase();
+    const postBody = new URLSearchParams();
+    postBody.append('sid', 'xiaomiio');
+    postBody.append('hash', hash);
+    postBody.append('callback', 'https://sts.api.io.mi.com/sts');
+    postBody.append('qs', '%3Fsid%3Dxiaomiio%26_json%3Dtrue');
+    postBody.append('user', this.username);
+    postBody.append('_json', 'true');
+    postBody.append('_sign', this.sign);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: this.headers,
+      body: postBody,
+    });
+
+    const text = await res.text();
+
+    const str = text.replace('&&&START&&&', '');
+    const data = JSON.parse(str);
+    const { cUserId, nonce, passToken, ssecurity, userId, location } = data;
+    Object.assign(this, { cUserId, userId, passToken, ssecurity, nonce });
+    await this.getServiceToken(location);
+
+    return await this.getDeviceList();
   }
 }
 
