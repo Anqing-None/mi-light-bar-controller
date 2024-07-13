@@ -111,8 +111,8 @@ const lightIsON = ref(false);
 const lightness = ref(40);
 const colorTemperature = ref(2700);
 const connectState = ref(false);
-const isStartWithSystem = useLocalStorage('isStartWithSystem', true);
-const isCloseWithSystem = useLocalStorage('isCloseWithSystem', true);
+const isStartWithSystem = useLocalStorage('isStartWithSystem', false);
+const isCloseWithSystem = useLocalStorage('isCloseWithSystem', false);
 
 watchDebounced(
   lightIsON,
@@ -161,10 +161,10 @@ onMounted(async () => {
   setCloseWithApp(isCloseWithSystem.value);
 
   // 同步灯的参数
-  const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
-  lightIsON.value = power === 'on';
-  lightness.value = _lightness;
-  colorTemperature.value = _colorTemperature;
+  // const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
+  // lightIsON.value = power === 'on';
+  // lightness.value = _lightness;
+  // colorTemperature.value = _colorTemperature;
 
   // 开机启动挂灯 ？
   if (isStartWithSystem.value) {

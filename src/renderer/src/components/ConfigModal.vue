@@ -42,6 +42,13 @@
               </div>
               <div @click="closeModal" class="btn w-[48%] btn-primary">确定</div>
             </div>
+
+            <div v-if="isShowFailedTips" class="alert alert-warning">
+              <div class="flex-1">
+                <span class="text-lg">注意：</span>
+                <span>请确保您的电脑显示器挂灯与电脑连接同一局域网（连接相同路由器）。</span>
+              </div>
+            </div>
           </div>
 
           <div class="flex flex-col gap-2" v-if="deviceList.length">
@@ -54,7 +61,7 @@
               />
               您的设备列表（{{ deviceList.length }}）
             </h1>
-            <div class="flex flex-col gap-2" :style="{ height: isFoldDeviceList ? '0' : 'auto' }">
+            <div class="flex flex-col gap-2" :style="{ height: isFoldDeviceList ? '0' : 'auto', overflow: 'hidden' }">
               <template v-for="device in deviceList" :key="token">
                 <div
                   @click="handleSelectDevice(device)"
@@ -156,7 +163,7 @@ interface Device {
   isOnline: boolean;
 }
 
-const { getLoginQRCode, loginWithAccount, checkConnection, connectState } = inject<any>('app');
+const { loginWithQRCode, loginWithAccount, checkConnection, connectState } = inject<any>('app');
 const configModalRef = ref();
 const qrcodeText = ref('text-to-encode');
 const qrcode = useQRCode(qrcodeText);
@@ -171,15 +178,24 @@ const selectedDeviceToken = useLocalStorage('selectedDeviceToken', '');
 const loginLoading = ref(false);
 const isFoldDeviceList = ref(false);
 const isTestConnect = ref(false);
+const isShowFailedTips = ref(false);
 
 async function toggleLoginMethod() {
   loginMethod.value = loginMethod.value === 'qrcode' ? 'account' : 'qrcode';
 
   if (loginMethod.value === 'qrcode') {
     qrcodeLoading.value = true;
-    const url = await getLoginQRCode();
-    qrcodeText.value = url;
+    const { lp, loginUrl } = await loginWithQRCode();
+
+    qrcodeText.value = loginUrl;
     qrcodeLoading.value = false;
+
+    // 等待扫描完成
+    window.electron.ipcRenderer.send('listen-qrcode-scan', lp);
+    window.electron.ipcRenderer.on('qrcode-success', (_, _deviceList) => {
+      console.log(_deviceList);
+      deviceList.value = JSON.parse(_deviceList);
+    });
   }
 }
 
@@ -209,7 +225,9 @@ async function handleTestConnect() {
   isTestConnect.value = true;
   const res = await checkConnection();
   isTestConnect.value = false;
-  console.log(res);
+  if (!res) {
+    isShowFailedTips.value = true;
+  }
 }
 
 const showModal = () => {

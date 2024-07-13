@@ -178,6 +178,10 @@ class Yeelight {
 
     return await Promise.race([sendAndWait(), timing()]);
   }
+
+  destory() {
+    this.socket.close();
+  }
 }
 
 export default Yeelight;

@@ -6,6 +6,7 @@ import Yeelight from './Yeelight';
 import MiLogin from './MiLogin';
 
 const yeelight = new Yeelight();
+const miaccount = new MiLogin();
 let isCloseWithApp = false;
 
 function createWindow(): void {
@@ -70,6 +71,12 @@ app.whenReady().then(() => {
   });
   ipcMain.handle('set-start-with-system', (_, v) => setStartWithSystem(v));
   ipcMain.handle('set-close-with-app', (_, v) => setCloseWithApp(v));
+  // ipcMain.handle('get-initstate', (_, v) => setCloseWithApp(v));
+
+  ipcMain.on('listen-qrcode-scan', async (event, lp) => {
+    const deviceList = await miaccount.listenScanState(lp);
+    event.sender.send('qrcode-success', deviceList);
+  });
 
   createWindow();
 
@@ -93,8 +100,7 @@ app.on('before-quit', async (event) => {
   event.preventDefault();
 
   if (isCloseWithApp) await turn('off');
-
-  app.quit();
+  yeelight.destory();
 });
 
 // In this file you can include the rest of your app"s specific main process
@@ -108,14 +114,13 @@ async function turn(state: 'on' | 'off') {
 }
 
 async function loginWithQRCode() {
-  const miaccount = new MiLogin();
   await miaccount.getSign();
   return await miaccount.getQRCode();
 }
 
 async function loginWithAccount({ username, password }) {
-  const mi = new MiLogin(username, password);
-  return await mi.getDevicesByAccount();
+  miaccount.setAccount(username, password);
+  return await miaccount.getDevicesByAccount();
 }
 
 function setStartWithSystem(isStartWithSystem: boolean) {

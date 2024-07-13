@@ -33,6 +33,11 @@ class MiLogin {
     }
   }
 
+  setAccount(username: string, password: string) {
+    this.username = username;
+    this.password = password;
+  }
+
   /**
    * step 1: 获取签名
    */
@@ -89,9 +94,9 @@ class MiLogin {
     const data = JSON.parse(str);
 
     const { lp, loginUrl } = data;
-    this.listenScanState(lp);
+    // this.listenScanState(lp);
 
-    return loginUrl;
+    return { lp, loginUrl };
   }
 
   /**
@@ -114,7 +119,9 @@ class MiLogin {
 
     Object.assign(this, { cUserId, userId, passToken, ssecurity, nonce });
 
-    this.getServiceToken(location);
+    await this.getServiceToken(location);
+    const deviceList = await this.getDeviceList();
+    return JSON.stringify(deviceList);
   }
 
   /**
@@ -144,8 +151,6 @@ class MiLogin {
     const serviceToken = serviceTokenCookie.replace('serviceToken=', '');
 
     this.serviceToken = serviceToken;
-
-    // this.getDeviceList();
   }
 
   /**
