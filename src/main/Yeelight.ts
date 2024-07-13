@@ -5,7 +5,6 @@ class Yeelight {
   ip: string = '';
   token: string = '';
 
-  isActive: boolean = false;
   socket: dgram.Socket = dgram.createSocket('udp4');
   deviceId: number = 0;
   stamp: number = 0;
@@ -30,30 +29,23 @@ class Yeelight {
     return crypto.createDecipheriv('aes-128-cbc', this.tokenKey, this.tokenKeyIV);
   }
 
-  constructor(ip: string, token: string) {
-    if (ip === '' || token === '') {
-      throw Error('ip or token is empty');
-    }
-
-    this.ip = ip;
-    this.token = token;
-
+  constructor() {
     this.socket.on('listening', () => {
       this.socket.setBroadcast(true);
       const address = this.socket.address();
       console.log(`socket is listening ${address.address}:${address.port}`);
     });
 
-    this.socket.on('message', (msg, remoteInfo) => {
-      this.handleMessage(msg, remoteInfo);
+    this.socket.on('message', (msg, _remoteInfo) => {
+      this.handleMessage(msg);
     });
 
     this.socket.bind();
+  }
 
-    this.hello().then((res: boolean) => {
-      this.isActive = res;
-      console.log('isActive', this.isActive);
-    });
+  setDevice(IP: string, token: string) {
+    this.ip = IP;
+    this.token = token;
   }
 
   async hello() {
@@ -128,7 +120,7 @@ class Yeelight {
     return await this.sendCommand(command);
   }
 
-  handleMessage(msg: Buffer, remoteInfo: dgram.RemoteInfo) {
+  handleMessage(msg: Buffer) {
     // console.log('get message from ', remoteInfo.address, remoteInfo.port, msg.toString());
     const buf = Buffer.from(msg);
     const header = Buffer.from(msg);
@@ -142,7 +134,7 @@ class Yeelight {
     if (msg.length !== 32) {
       const decipher = this.decipher;
       const decrypted = Buffer.concat([decipher.update(buf.slice(32)), decipher.final()]);
-      console.log(decrypted.toString());
+      // console.log(decrypted.toString());
       const resObj = JSON.parse(decrypted.toString());
       const result = resObj.result;
       console.log(result);
@@ -166,8 +158,8 @@ class Yeelight {
       const res = await this.send(buf, port, ip);
       if (res) {
         return new Promise((resolve, _) => {
-          this.socket.once('message', (msg, remoteInfo) => {
-            this.handleMessage(msg, remoteInfo);
+          this.socket.once('message', (msg, _remoteInfo) => {
+            this.handleMessage(msg);
             resolve(true);
           });
         });

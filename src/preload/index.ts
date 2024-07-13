@@ -11,6 +11,8 @@ const api = {
   loginWithQRCode: () => ipcRenderer.invoke('get-login-qrcode'),
   loginWithAccount: ({ username, password }) => ipcRenderer.invoke('login-with-account', { username, password }),
   testConnection: (IP: string, token: string) => ipcRenderer.invoke('test-connection', IP, token),
+  setStartWithSystem: (isStartWithSystem: boolean) => ipcRenderer.invoke('set-start-with-system', isStartWithSystem),
+  setCloseWithApp: (isCloseWithApp: boolean) => ipcRenderer.invoke('set-close-with-app', isCloseWithApp),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

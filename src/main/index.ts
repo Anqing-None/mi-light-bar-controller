@@ -5,6 +5,9 @@ import icon from '../../resources/icon.png?asset';
 import Yeelight from './Yeelight';
 import MiLogin from './MiLogin';
 
+const yeelight = new Yeelight();
+let isCloseWithApp = false;
+
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -44,7 +47,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron');
+  electronApp.setAppUserModelId('top.xieanqing.mi-light-controller');
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -62,10 +65,11 @@ app.whenReady().then(() => {
   ipcMain.handle('login-with-qrcode', () => loginWithQRCode());
   ipcMain.handle('login-with-account', (_, { username, password }) => loginWithAccount({ username, password }));
   ipcMain.handle('test-connection', async (_, IP, token) => {
-    const mi = new Yeelight(IP, token);
-    console.log('test-connection', IP, token);
-    return await mi.hello();
+    yeelight.setDevice(IP, token);
+    return await yeelight.hello();
   });
+  ipcMain.handle('set-start-with-system', (_, v) => setStartWithSystem(v));
+  ipcMain.handle('set-close-with-app', (_, v) => setCloseWithApp(v));
 
   createWindow();
 
@@ -85,16 +89,21 @@ app.on('window-all-closed', () => {
   }
 });
 
+app.on('before-quit', async (event) => {
+  event.preventDefault();
+
+  if (isCloseWithApp) await turn('off');
+
+  app.quit();
+});
+
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
 async function turn(state: 'on' | 'off') {
-  const mi = new Yeelight('192.168.31.136', '31ccfa2755a639cb3a8a6779853569b2');
-
-  const res = await mi.hello();
-
+  const res = await yeelight.hello();
   if (res) {
-    mi.turn(state);
+    yeelight.turn(state);
   }
 }
 
@@ -107,4 +116,15 @@ async function loginWithQRCode() {
 async function loginWithAccount({ username, password }) {
   const mi = new MiLogin(username, password);
   return await mi.getDevicesByAccount();
+}
+
+function setStartWithSystem(isStartWithSystem: boolean) {
+  app.setLoginItemSettings({
+    openAtLogin: isStartWithSystem,
+    openAsHidden: false,
+  });
+}
+
+function setCloseWithApp(_isCloseWithApp: boolean) {
+  isCloseWithApp = _isCloseWithApp;
 }

@@ -13,6 +13,8 @@ declare global {
       loginWithAccount: ({ username, password }) => Promise<any[]>;
       testConnection: (IP: string, token: string) => boolean;
       getInitState: () => Promise<{ power: string; lightness: number; colorTemperature: number }>;
+      setStartWithSystem: (isStartWithSystem: boolean) => void;
+      setCloseWithApp: (isCloseWithApp: boolean) => void;
     };
   }
 }

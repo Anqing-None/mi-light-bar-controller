@@ -72,14 +72,14 @@
             <div class="form-control w-full">
               <label class="label justify-between cursor-pointer">
                 <span class="label-text">跟随电脑开启</span>
-                <input type="checkbox" class="toggle toggle-success" checked />
+                <input v-model="isStartWithSystem" type="checkbox" class="toggle toggle-success" checked />
               </label>
             </div>
 
             <div class="form-control w-full">
               <label class="label cursor-pointer">
                 <span class="label-text">跟随电脑关闭</span>
-                <input type="checkbox" class="toggle toggle-success" checked />
+                <input v-model="isCloseWithSystem" type="checkbox" class="toggle toggle-success" checked />
               </label>
             </div>
           </div>
@@ -100,23 +100,19 @@ import 'gridstack/dist/gridstack.min.css';
 import { GridStack } from 'gridstack';
 import { onMounted, ref, provide } from 'vue';
 import { ElInputNumber } from 'element-plus';
-import { useQRCode } from '@vueuse/integrations/useQRCode';
 import { watchDebounced, useLocalStorage } from '@vueuse/core';
 import TemperatureCard from './components/TemperatureCard.vue';
 import Header from './components/Header.vue';
 import ConfigModal from './components/ConfigModal.vue';
-const { turnOn, turnOff, setLightness, setColorTemp, testConnection, getInitState, getLoginQRCode, loginWithQRCode, loginWithAccount } = window.api;
+const { turnOn, turnOff, setLightness, setColorTemp, testConnection, getInitState, loginWithQRCode, loginWithAccount, setStartWithSystem, setCloseWithApp } = window.api;
 
 const configModalRef = ref();
 const lightIsON = ref(false);
 const lightness = ref(40);
 const colorTemperature = ref(2700);
 const connectState = ref(false);
-const configModalVisible = ref(false);
-
-const qrcodeText = ref('text-to-encode');
-const qrcode = useQRCode(qrcodeText);
-let grid: GridStack | null = null;
+const isStartWithSystem = useLocalStorage('isStartWithSystem', true);
+const isCloseWithSystem = useLocalStorage('isCloseWithSystem', true);
 
 watchDebounced(
   lightIsON,
@@ -142,10 +138,6 @@ watchDebounced(
   { debounce: 300 },
 );
 
-onMounted(async () => {
-  grid = GridStack.init({ float: true, cellHeight: '70px', minRow: 1 });
-});
-
 async function checkConnection() {
   const IP = localStorage.getItem('IP') || '';
   const token = localStorage.getItem('token') || '';
@@ -159,11 +151,26 @@ function openSettingModal() {
   configModalRef.value.showModal();
 }
 
-// onMounted(async () => {
-//   await checkConnection();
-// });
-
 provide('app', { connectState, checkConnection, loginWithQRCode, openSettingModal, loginWithAccount });
+
+onMounted(async () => {
+  GridStack.init({ float: true, cellHeight: '70px', minRow: 1 });
+
+  // update state
+  setStartWithSystem(isStartWithSystem.value);
+  setCloseWithApp(isCloseWithSystem.value);
+
+  // 同步灯的参数
+  const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
+  lightIsON.value = power === 'on';
+  lightness.value = _lightness;
+  colorTemperature.value = _colorTemperature;
+
+  // 开机启动挂灯 ？
+  if (isStartWithSystem.value) {
+    lightIsON.value = true;
+  }
+});
 </script>
 
 <style scoped>
