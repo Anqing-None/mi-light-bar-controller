@@ -48,7 +48,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('top.xieanqing.mi-light-controller');
+  electronApp.setAppUserModelId('top.xieanqing.mi-light-bar-controller');
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -57,12 +57,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
-  // IPC test
-  ipcMain.handle('ping', () => console.log('pong'));
-  ipcMain.handle('turn-on', () => turn('on'));
-  ipcMain.handle('turn-off', () => turn('off'));
-  ipcMain.handle('set-lightness', (_, v) => console.log('set-lightness', v));
-  ipcMain.handle('set-color-temp', (_, v) => console.log('set-color-temp', v));
+  // IPC handlers
+  ipcMain.handle('exec-command', async (_, v) => await execCommand(v));
   ipcMain.handle('login-with-qrcode', () => loginWithQRCode());
   ipcMain.handle('login-with-account', (_, { username, password }) => loginWithAccount({ username, password }));
   ipcMain.handle('test-connection', async (_, IP, token) => {
@@ -71,7 +67,6 @@ app.whenReady().then(() => {
   });
   ipcMain.handle('set-start-with-system', (_, v) => setStartWithSystem(v));
   ipcMain.handle('set-close-with-app', (_, v) => setCloseWithApp(v));
-  // ipcMain.handle('get-initstate', (_, v) => setCloseWithApp(v));
 
   ipcMain.on('listen-qrcode-scan', async (event, lp) => {
     const deviceList = await miaccount.listenScanState(lp);
@@ -99,19 +94,13 @@ app.on('window-all-closed', () => {
 app.on('before-quit', async (event) => {
   event.preventDefault();
 
-  if (isCloseWithApp) await turn('off');
+  if (isCloseWithApp) await yeelight.turn('off');
+
   yeelight.destory();
 });
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
-
-async function turn(state: 'on' | 'off') {
-  const res = await yeelight.hello();
-  if (res) {
-    yeelight.turn(state);
-  }
-}
 
 async function loginWithQRCode() {
   await miaccount.getSign();
@@ -132,4 +121,8 @@ function setStartWithSystem(isStartWithSystem: boolean) {
 
 function setCloseWithApp(_isCloseWithApp: boolean) {
   isCloseWithApp = _isCloseWithApp;
+}
+
+async function execCommand(command) {
+  return await yeelight.sendCommand(command);
 }

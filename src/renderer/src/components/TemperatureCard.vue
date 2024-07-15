@@ -2,7 +2,7 @@
   <div class="w-full h-full flex flex-col gap-2 justify-center items-center bg-gray-100 dark:bg-neutral-800 rounded-lg">
     <h2 class="w-4/5 flex gap-2 items-center text-xl leading-7 font-bold text-left">
       色温调节
-      <ElInputNumber class="w-4 inline-block" v-model="temperature" :min="2700" :max="6500" :step="100" controls-position="right" />
+      <ElInputNumber @change="() => (selectedModeId = '')" class="w-4 inline-block" v-model="temperature" :min="2700" :max="6500" :step="100" controls-position="right" />
       K
     </h2>
     <div ref="container" class="w-4/5 relative" :style="{ width: `${width}px`, height: `${height}px` }" @click="handleClick">
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue';
+import { onMounted, ref, computed, watch, inject } from 'vue';
 import { ElInputNumber } from 'element-plus';
 import { clamp } from '@/utils/util';
 import chroma from 'chroma-js';
@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<{ temperature: number }>(), {
   temperature: 2700,
 });
 const emit = defineEmits(['update:temperature']);
+const { selectedModeId } = inject<any>('app');
 
 const temperature = computed({
   get: () => props.temperature,
@@ -29,6 +30,13 @@ const temperature = computed({
     emit('update:temperature', value);
   },
 });
+
+watch(
+  () => props.temperature,
+  (value) => {
+    temperature.value = value;
+  },
+);
 
 const container = ref<HTMLElement>();
 // 6500 - 2700 = 3800 步长设置为10，所以有381个温度值，范围为2700 - 2710 - ... - 6500
@@ -44,8 +52,9 @@ const sliderOffsetY = -5;
 const sliderX = ref(tempToSliderX(temperature.value));
 const sliderSelectorStyle = computed(() => {
   const top = sliderOffsetY;
+  const _sliderX = sliderX.value;
   // 拖拽条位置限制在容器内，范围 [-5, 381 - 5]
-  const left = clamp(sliderX.value, sliderOffsetX, width + sliderOffsetX);
+  const left = clamp(_sliderX, sliderOffsetX, width + sliderOffsetX);
 
   return {
     width: `${sliderWidth}px`,
@@ -70,6 +79,7 @@ function sliderXToTemp(x: number) {
 }
 
 function handleMouseDown(e: MouseEvent) {
+  selectedModeId.value = '';
   const { clientX: startClientX, clientY: startClientY } = e;
   const startSliderX = sliderX.value;
 
@@ -90,6 +100,7 @@ function handleMouseDown(e: MouseEvent) {
 }
 
 function handleClick(e: MouseEvent) {
+  selectedModeId.value = '';
   const { clientX } = e;
   const target = e.currentTarget as HTMLElement;
   const rect = target.getBoundingClientRect();

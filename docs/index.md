@@ -6,6 +6,9 @@ hero:
   name: '挂灯控制器'
   text: 'PC端挂灯控制器'
   tagline: 在电脑端控制你的米家智能显示器挂灯1S
+  image:
+    src: /mi-light-bar.png
+    alt: lightBarImage
   actions:
     - theme: brand
       text: 下载

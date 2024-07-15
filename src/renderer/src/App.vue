@@ -19,10 +19,11 @@
             <h2 class="flex gap-2 items-center w-4/5 text-xl leading-7 font-bold text-left">
               亮度
               <!-- <span>{{ lightness }}%</span> -->
-              <ElInputNumber class="w-2 inline-block" v-model="lightness" :min="0" :max="100" :step="5" controls-position="right" :disabled="!lightIsON" />
+              <ElInputNumber class="w-2 inline-block" @change="() => (selectedModeId = '')" v-model.number="lightness" :min="0" :max="100" :step="5" controls-position="right" :disabled="!lightIsON" />
               %
             </h2>
             <input
+              @change="() => (selectedModeId = '')"
               class="range w-4/5"
               :class="{
                 'cursor-not-allowed': !lightIsON,
@@ -32,7 +33,7 @@
               type="range"
               min="0"
               max="100"
-              v-model="lightness"
+              v-model.number="lightness"
               :disabled="!lightIsON"
             />
           </div>
@@ -49,18 +50,12 @@
       <!-- mode card -->
       <div class="grid-stack-item" gs-w="5" gs-h="4" gs-x="7" gs-y="0">
         <div class="grid-stack-item-content">
-          <div class="w-full h-full p-4 flex flex-col gap-2 bg-gray-100 dark:bg-neutral-800 rounded-lg">
+          <div class="w-full h-full p-4 flex flex-col gap-4 bg-gray-100 dark:bg-neutral-800 rounded-lg">
             <h2 class="text-xl leading-7 font-bold text-left">模式切换</h2>
-
-            <div>
-              <form>
-                <fieldset class="grid gap-2 grid-cols-2">
-                  <input class="btn bg-base-100" id="1" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                  <input class="btn bg-base-100" id="2" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                  <input class="btn bg-base-100" id="3" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                  <input class="btn bg-base-100" id="4" name="mode" type="radio" aria-label="Radio" :disabled="!lightIsON" />
-                </fieldset>
-              </form>
+            <div class="grid gap-4 grid-cols-2">
+              <div v-for="mode in modeList" class="btn" :class="{ 'btn-primary text-white': mode.id === selectedModeId }" @click="selectedModeId = mode.id">
+                {{ mode.name }}
+              </div>
             </div>
           </div>
         </div>
@@ -104,7 +99,7 @@ import { watchDebounced, useLocalStorage } from '@vueuse/core';
 import TemperatureCard from './components/TemperatureCard.vue';
 import Header from './components/Header.vue';
 import ConfigModal from './components/ConfigModal.vue';
-const { turnOn, turnOff, setLightness, setColorTemp, testConnection, getInitState, loginWithQRCode, loginWithAccount, setStartWithSystem, setCloseWithApp } = window.api;
+const { turnOn, turnOff, setLightness, setColorTemp, testConnection, loginWithQRCode, loginWithAccount, setStartWithSystem, setCloseWithApp } = window.api;
 
 const configModalRef = ref();
 const lightIsON = ref(false);
@@ -113,6 +108,70 @@ const colorTemperature = ref(2700);
 const connectState = ref(false);
 const isStartWithSystem = useLocalStorage('isStartWithSystem', false);
 const isCloseWithSystem = useLocalStorage('isCloseWithSystem', false);
+
+const modeList = [
+  {
+    id: '1',
+    name: '办公',
+    params: {
+      lightness: 50,
+      colorTemperature: 4000,
+    },
+  },
+  {
+    id: '2',
+    name: '阅读',
+    params: {
+      lightness: 60,
+      colorTemperature: 4400,
+    },
+  },
+  {
+    id: '3',
+    name: '休闲',
+    params: {
+      lightness: 65,
+      colorTemperature: 4800,
+    },
+  },
+  {
+    id: '4',
+    name: '电脑',
+    params: {
+      lightness: 80,
+      colorTemperature: 5200,
+    },
+  },
+  {
+    id: '5',
+    name: '温馨',
+    params: {
+      lightness: 90,
+      colorTemperature: 5300,
+    },
+  },
+  {
+    id: '6',
+    name: '闪烁',
+    params: {
+      lightness: 100,
+      colorTemperature: 5800,
+    },
+  },
+];
+
+const selectedModeId = useLocalStorage('selectedModeId', '');
+
+watchDebounced(
+  selectedModeId,
+  (id) => {
+    const mode = modeList.find((m) => m.id === id);
+    if (!mode) return;
+    lightness.value = mode.params.lightness;
+    colorTemperature.value = mode.params.colorTemperature;
+  },
+  { debounce: 300 },
+);
 
 watchDebounced(
   lightIsON,
@@ -151,7 +210,7 @@ function openSettingModal() {
   configModalRef.value.showModal();
 }
 
-provide('app', { connectState, checkConnection, loginWithQRCode, openSettingModal, loginWithAccount });
+provide('app', { connectState, selectedModeId, checkConnection, loginWithQRCode, openSettingModal, loginWithAccount });
 
 onMounted(async () => {
   GridStack.init({ float: true, cellHeight: '70px', minRow: 1 });
