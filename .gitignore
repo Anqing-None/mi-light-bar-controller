@@ -5,3 +5,6 @@ out
 *.log*
 .vscode
 build
+
+docs/.vitepress/dist
+docs/.vitepress/cache

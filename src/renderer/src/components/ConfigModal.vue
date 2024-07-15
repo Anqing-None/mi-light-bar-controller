@@ -243,5 +243,3 @@ defineExpose({
   closeModal,
 });
 </script>
-
-<style scoped></style>
