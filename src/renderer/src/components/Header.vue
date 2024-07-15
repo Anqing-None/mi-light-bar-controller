@@ -1,6 +1,6 @@
 <template>
-  <header class="flex justify-between items-center pr-2">
-    <div class="flex justify-center items-center flex-grow">
+  <header class="flex justify-between items-center px-2">
+    <div class="flex justify-start items-center flex-grow">
       <div class="tooltip tooltip-bottom" :data-tip="connectState ? '已连接' : '未连接'">
         <IconsMi @click="checkConnection" class="block w-6 h-6 mr-2 cursor-pointer" :style="{ filter: connectState ? '' : 'grayscale(1)' }" />
       </div>

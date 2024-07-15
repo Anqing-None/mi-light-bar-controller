@@ -19,23 +19,10 @@
             <h2 class="flex gap-2 items-center w-4/5 text-xl leading-7 font-bold text-left">
               亮度
               <!-- <span>{{ lightness }}%</span> -->
-              <ElInputNumber class="w-2 inline-block" @change="() => (selectedModeId = '')" v-model.number="lightness" :min="0" :max="100" :step="5" controls-position="right" :disabled="!lightIsON" />
+              <ElInputNumber class="w-2 inline-block" @change="() => (selectedModeId = '')" v-model.number="lightness" :min="0" :max="100" :step="5" controls-position="right" />
               %
             </h2>
-            <input
-              @change="() => (selectedModeId = '')"
-              class="range w-4/5"
-              :class="{
-                'cursor-not-allowed': !lightIsON,
-                'bg-gray-100': !lightIsON,
-                'range-primary': lightIsON,
-              }"
-              type="range"
-              min="0"
-              max="100"
-              v-model.number="lightness"
-              :disabled="!lightIsON"
-            />
+            <input @change="() => (selectedModeId = '')" class="range range-primary w-4/5" type="range" min="0" max="100" v-model.number="lightness" />
           </div>
         </div>
       </div>
@@ -53,7 +40,7 @@
           <div class="w-full h-full p-4 flex flex-col gap-4 bg-gray-100 dark:bg-neutral-800 rounded-lg">
             <h2 class="text-xl leading-7 font-bold text-left">模式切换</h2>
             <div class="grid gap-4 grid-cols-2">
-              <div v-for="mode in modeList" class="btn" :class="{ 'btn-primary text-white': mode.id === selectedModeId }" @click="selectedModeId = mode.id">
+              <div v-for="mode in modeList" class="btn hover:btn-primary hover:text-white" :class="{ 'btn-primary text-white': mode.id === selectedModeId }" @click="selectedModeId = mode.id">
                 {{ mode.name }}
               </div>
             </div>
@@ -99,12 +86,12 @@ import { watchDebounced, useLocalStorage } from '@vueuse/core';
 import TemperatureCard from './components/TemperatureCard.vue';
 import Header from './components/Header.vue';
 import ConfigModal from './components/ConfigModal.vue';
-const { turnOn, turnOff, setLightness, setColorTemp, testConnection, loginWithQRCode, loginWithAccount, setStartWithSystem, setCloseWithApp } = window.api;
+const { testConnection, loginWithQRCode, loginWithAccount, setStartWithSystem, setCloseWithApp, execCommand } = window.api;
 
 const configModalRef = ref();
 const lightIsON = ref(false);
-const lightness = ref(40);
-const colorTemperature = ref(2700);
+const lightness = useLocalStorage('lightness', 40);
+const colorTemperature = useLocalStorage('colorTemperature', 2700);
 const connectState = ref(false);
 const isStartWithSystem = useLocalStorage('isStartWithSystem', false);
 const isCloseWithSystem = useLocalStorage('isCloseWithSystem', false);
@@ -176,7 +163,7 @@ watchDebounced(
 watchDebounced(
   lightIsON,
   (isON) => {
-    isON ? turnOn() : turnOff();
+    // isON ? turnOn() : turnOff();
   },
   { debounce: 300 },
 );
@@ -184,7 +171,7 @@ watchDebounced(
 watchDebounced(
   lightness,
   (value) => {
-    setLightness(value);
+    // setLightness(value);
   },
   { debounce: 300 },
 );
@@ -192,7 +179,7 @@ watchDebounced(
 watchDebounced(
   colorTemperature,
   (value) => {
-    setColorTemp(value);
+    // setColorTemp(value);
   },
   { debounce: 300 },
 );

@@ -18,12 +18,24 @@ export default {
       {
         light: {
           ...themes['light'],
-          "base-100": "#fff",
+          primary: '#3b82f6',
+          '.btn': {
+            'background-color': '#e5e7eb',
+          },
+          '.btn-primary': {
+            'background-color': '#3b82f6',
+          },
         },
         dark: {
           ...themes['dark'],
-          // "base-100": "#242424",
-        }
+          primary: '#1d4ed8',
+          '.btn': {
+            'background-color': '#1a1e23',
+          },
+          '.btn-primary': {
+            'background-color': '#1d4ed8',
+          },
+        },
       },
     ],
   },

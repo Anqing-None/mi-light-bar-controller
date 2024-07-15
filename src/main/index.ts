@@ -94,9 +94,14 @@ app.on('window-all-closed', () => {
 app.on('before-quit', async (event) => {
   event.preventDefault();
 
-  if (isCloseWithApp) await yeelight.turn('off');
-
-  yeelight.destory();
+  try {
+    const res = await yeelight.hello();
+    if (isCloseWithApp && res) await yeelight.turn('off');
+    yeelight.destory();
+  } catch (error) {
+  } finally {
+    app.exit();
+  }
 });
 
 // In this file you can include the rest of your app"s specific main process
