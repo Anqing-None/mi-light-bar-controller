@@ -1,21 +1,10 @@
-// @ts-ignore
-const { execCommand } = window.api;
 // https://www.yeelight.com/download/Yeelight_Inter-Operation_Spec.pdf
+const { execCommand } = window.api;
 
 interface Command {
   id: number;
   method: string;
   params: (string | number)[];
-}
-
-export async function setPower(state: 'on' | 'off') {
-  const command: Command = {
-    id: 1,
-    method: 'set_power',
-    params: [state],
-  };
-
-  return await execCommand(command);
 }
 
 export async function getInitState() {
@@ -28,11 +17,21 @@ export async function getInitState() {
   return await execCommand(command);
 }
 
-export async function setBrightness(brightness: number) {
+export async function setPower(state: 'on' | 'off') {
   const command: Command = {
-    id: 1,
+    id: 2,
+    method: 'set_power',
+    params: [state],
+  };
+
+  return await execCommand(command);
+}
+
+export async function setBright(bright: number) {
+  const command: Command = {
+    id: 3,
     method: 'set_bright',
-    params: [brightness, 'smooth', 500],
+    params: [bright, 'smooth', 500],
   };
 
   return await execCommand(command);
@@ -40,7 +39,7 @@ export async function setBrightness(brightness: number) {
 
 export async function set_CT(CT: number) {
   const command: Command = {
-    id: 1,
+    id: 4,
     method: 'set_ct_abx',
     params: [CT, 'smooth', 500],
   };

@@ -80,15 +80,19 @@
 <script setup lang="ts">
 import 'gridstack/dist/gridstack.min.css';
 import { GridStack } from 'gridstack';
-import { onMounted, ref, provide } from 'vue';
+import { onMounted, onBeforeMount, ref, provide } from 'vue';
 import { ElInputNumber } from 'element-plus';
 import { watchDebounced, useLocalStorage } from '@vueuse/core';
 import TemperatureCard from './components/TemperatureCard.vue';
 import Header from './components/Header.vue';
 import ConfigModal from './components/ConfigModal.vue';
+import { getInitState, setPower, setBright, set_CT } from '@/api/control';
+
 const { testConnection, loginWithQRCode, loginWithAccount, setStartWithSystem, setCloseWithApp, execCommand } = window.api;
 
 const configModalRef = ref();
+const IP = useLocalStorage('IP', '');
+const token = useLocalStorage('token', '');
 const lightIsON = ref(false);
 const lightness = useLocalStorage('lightness', 40);
 const colorTemperature = useLocalStorage('colorTemperature', 2700);
@@ -101,40 +105,40 @@ const modeList = [
     id: '1',
     name: '办公',
     params: {
-      lightness: 50,
-      colorTemperature: 4000,
+      lightness: 100,
+      colorTemperature: 4500,
     },
   },
   {
     id: '2',
     name: '阅读',
     params: {
-      lightness: 60,
-      colorTemperature: 4400,
+      lightness: 1000,
+      colorTemperature: 6000,
     },
   },
   {
     id: '3',
     name: '休闲',
     params: {
-      lightness: 65,
-      colorTemperature: 4800,
+      lightness: 50,
+      colorTemperature: 4000,
     },
   },
   {
     id: '4',
     name: '电脑',
     params: {
-      lightness: 80,
-      colorTemperature: 5200,
+      lightness: 50,
+      colorTemperature: 2700,
     },
   },
   {
     id: '5',
     name: '温馨',
     params: {
-      lightness: 90,
-      colorTemperature: 5300,
+      lightness: 60,
+      colorTemperature: 3500,
     },
   },
   {
@@ -163,7 +167,8 @@ watchDebounced(
 watchDebounced(
   lightIsON,
   (isON) => {
-    // isON ? turnOn() : turnOff();
+    const state = isON ? 'on' : 'off';
+    setPower(state);
   },
   { debounce: 300 },
 );
@@ -171,7 +176,7 @@ watchDebounced(
 watchDebounced(
   lightness,
   (value) => {
-    // setLightness(value);
+    setBright(value);
   },
   { debounce: 300 },
 );
@@ -179,16 +184,18 @@ watchDebounced(
 watchDebounced(
   colorTemperature,
   (value) => {
-    // setColorTemp(value);
+    set_CT(value);
   },
   { debounce: 300 },
 );
 
 async function checkConnection() {
-  const IP = localStorage.getItem('IP') || '';
-  const token = localStorage.getItem('token') || '';
+  if (IP.value === '' || token.value === '') {
+    connectState.value = false;
+    return false;
+  }
 
-  const res = await testConnection(IP, token);
+  const res = await testConnection(IP.value, token.value);
   connectState.value = res;
   return res;
 }
@@ -197,7 +204,20 @@ function openSettingModal() {
   configModalRef.value.showModal();
 }
 
-provide('app', { connectState, selectedModeId, checkConnection, loginWithQRCode, openSettingModal, loginWithAccount });
+provide('app', { connectState, selectedModeId, IP, token, checkConnection, loginWithQRCode, openSettingModal, loginWithAccount });
+
+onBeforeMount(async () => {
+  if (IP.value === '' || token.value === '') return;
+  const res = await checkConnection();
+  console.log('onBeforeMount test connection', res);
+
+  if (res) {
+    // const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
+    // lightIsON.value = power === 'on';
+    // lightness.value = _lightness;
+    // colorTemperature.value = _colorTemperature;
+  }
+});
 
 onMounted(async () => {
   GridStack.init({ float: true, cellHeight: '70px', minRow: 1 });
@@ -207,6 +227,9 @@ onMounted(async () => {
   setCloseWithApp(isCloseWithSystem.value);
 
   // 同步灯的参数
+
+  // 如果灯是打开的状态，同步灯的参数到界面
+  // 如果灯是关闭的，且配置了跟随电脑开启，使用软件的参数开启灯
   // const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
   // lightIsON.value = power === 'on';
   // lightness.value = _lightness;

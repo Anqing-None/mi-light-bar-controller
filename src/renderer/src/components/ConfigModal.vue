@@ -163,14 +163,12 @@ interface Device {
   isOnline: boolean;
 }
 
-const { loginWithQRCode, loginWithAccount, checkConnection, connectState } = inject<any>('app');
+const { loginWithQRCode, loginWithAccount, checkConnection, connectState, IP, token } = inject<any>('app');
 const configModalRef = ref();
 const qrcodeText = ref('text-to-encode');
 const qrcode = useQRCode(qrcodeText);
 const loginMethod = ref<'qrcode' | 'account'>('account');
 const qrcodeLoading = ref(false);
-const IP = useLocalStorage('IP', '');
-const token = useLocalStorage('token', '');
 const username = useLocalStorage('username', '');
 const password = useLocalStorage('password', '');
 const deviceList = useLocalStorage<Device[]>('deviceList', []);

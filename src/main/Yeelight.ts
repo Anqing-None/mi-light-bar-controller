@@ -97,7 +97,7 @@ class Yeelight {
 
     const newPacket = Buffer.concat([header, encrypted]);
 
-    return await this.send(newPacket, 54321, this.ip);
+    return await this.sendMessageAndWaitResponse(newPacket, 54321, this.ip);
   }
 
   async getInitState() {
@@ -153,7 +153,7 @@ class Yeelight {
     });
   }
 
-  async sendMessageAndWaitResponse(buf: Buffer, port: number, ip: string, timeout: number = 5000) {
+  async sendMessageAndWaitResponse(buf: Buffer, port: number, ip: string, timeout: number = 3000) {
     const sendAndWait = async (): Promise<boolean> => {
       const res = await this.send(buf, port, ip);
       if (res) {
