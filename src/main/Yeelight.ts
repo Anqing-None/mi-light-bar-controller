@@ -68,10 +68,11 @@ class Yeelight {
      * miio协议
      * https://github.com/OpenMiHome/mihome-binary-protocol/blob/master/doc/PROTOCOL.md
      */
+    await this.hello();
+
     const header = Buffer.alloc(2 + 2 + 4 + 4 + 4 + 16);
     header[0] = 0x21;
     header[1] = 0x31;
-
     // device id
     header.writeInt32BE(this.deviceId, 8);
 
@@ -117,6 +118,8 @@ class Yeelight {
 
     this.deviceId = deviceId;
     this.stamp = stamp;
+
+    // console.log('stamp,deviceId', stamp, deviceId);
     // hello packet length is 32，other packet length is message
     if (msg.length === 32) {
       return { id: 1, result: ['ok'] };
@@ -142,12 +145,15 @@ class Yeelight {
   }
 
   async sendMessageAndWaitResponse(buf: Buffer, port: number, ip: string, timeout: number = 3000) {
+    let timeoutId;
+
     const sendAndWait = async (): Promise<any> => {
       const res = await this.send(buf, port, ip);
       if (res) {
         return new Promise((resolve, _) => {
           this.socket.once('message', (msg, _remoteInfo) => {
             const ret = this.handleMessage(msg);
+            clearTimeout(timeoutId);
             resolve(ret);
           });
         });
@@ -158,8 +164,9 @@ class Yeelight {
 
     const timing = (): Promise<any> => {
       return new Promise((resolve, _) => {
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           const timeoutErr = { id: 1, error: { message: 'timeout', code: -1 } };
+          // console.log(timeoutErr);
           resolve(timeoutErr);
         }, timeout);
       });
