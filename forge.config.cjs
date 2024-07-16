@@ -1,4 +1,17 @@
 module.exports = {
+  publishers: [
+    {
+      name: 'https://github.com/Anqing-None',
+      config: {
+        repository: {
+          owner: 'Anqing-None',
+          name: 'mi-light-bar-controller'
+        },
+        prerelease: false,
+        draft: true
+      }
+    }
+  ],
   packagerConfig: {
     ignore: [
       /^\/src/,

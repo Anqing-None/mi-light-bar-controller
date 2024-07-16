@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: electron-app
+appId: top.xieanqing.mi-light-bar-controller
+productName: mi-light-bar-controller
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: electron-app
+  executableName: mi-light-bar-controller
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
