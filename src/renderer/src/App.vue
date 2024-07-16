@@ -114,7 +114,7 @@ const modeList = [
     name: '阅读',
     params: {
       lightness: 1000,
-      colorTemperature: 6000,
+      colorTemperature: 5000,
     },
   },
   {
@@ -192,11 +192,11 @@ watchDebounced(
 async function checkConnection() {
   if (IP.value === '' || token.value === '') {
     connectState.value = false;
-    return false;
+    return { id: 1, error: { message: 'IP and token can not be empty.', code: -1 } };
   }
 
   const res = await testConnection(IP.value, token.value);
-  connectState.value = res;
+  connectState.value = Object.hasOwn(res, 'result');
   return res;
 }
 
@@ -209,13 +209,28 @@ provide('app', { connectState, selectedModeId, IP, token, checkConnection, login
 onBeforeMount(async () => {
   if (IP.value === '' || token.value === '') return;
   const res = await checkConnection();
+
+  const isSucessed = Object.hasOwn(res, 'result');
+
   console.log('onBeforeMount test connection', res);
 
-  if (res) {
-    // const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
-    // lightIsON.value = power === 'on';
-    // lightness.value = _lightness;
-    // colorTemperature.value = _colorTemperature;
+  if (isSucessed) {
+    const res = await getInitState();
+
+    if (Object.hasOwn(res, 'result')) {
+      const [power, bright, ct] = (res as ResultSuccess).result;
+      // 如果灯是打开的状态，同步灯的参数到界面
+      if (power === 'on') {
+        lightIsON.value = true;
+        lightness.value = +bright;
+        colorTemperature.value = +ct;
+      } else if(isStartWithSystem.value) {
+        // 如果灯是关闭的，且配置了跟随电脑开启，使用软件的参数开启灯
+        setPower('on').then(() => lightIsON.value = true)
+        setBright(lightness.value);
+        set_CT(colorTemperature.value);
+      }
+    }
   }
 });
 
@@ -225,20 +240,6 @@ onMounted(async () => {
   // update state
   setStartWithSystem(isStartWithSystem.value);
   setCloseWithApp(isCloseWithSystem.value);
-
-  // 同步灯的参数
-
-  // 如果灯是打开的状态，同步灯的参数到界面
-  // 如果灯是关闭的，且配置了跟随电脑开启，使用软件的参数开启灯
-  // const { power, lightness: _lightness, colorTemperature: _colorTemperature } = await getInitState();
-  // lightIsON.value = power === 'on';
-  // lightness.value = _lightness;
-  // colorTemperature.value = _colorTemperature;
-
-  // 开机启动挂灯 ？
-  if (isStartWithSystem.value) {
-    lightIsON.value = true;
-  }
 });
 </script>
 

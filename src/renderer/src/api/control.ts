@@ -11,7 +11,7 @@ export async function getInitState() {
   const command: Command = {
     id: 1,
     method: 'get_prop',
-    params: ['power', 'bright', 'CT'],
+    params: ['power', 'bright', 'ct'],
   };
 
   return await execCommand(command);

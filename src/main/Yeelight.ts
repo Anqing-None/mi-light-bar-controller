@@ -100,16 +100,6 @@ class Yeelight {
     return await this.sendMessageAndWaitResponse(newPacket, 54321, this.ip);
   }
 
-  async getInitState() {
-    const command = {
-      id: 1,
-      method: 'set_power',
-      params: ['power', 'bright', 'CT'],
-    };
-
-    return await this.sendCommand(command);
-  }
-
   async turn(state: 'on' | 'off') {
     const command = {
       id: 1,
@@ -121,23 +111,21 @@ class Yeelight {
   }
 
   handleMessage(msg: Buffer) {
-    // console.log('get message from ', remoteInfo.address, remoteInfo.port, msg.toString());
     const buf = Buffer.from(msg);
-    const header = Buffer.from(msg);
-    const deviceId = header.readUInt32BE(8);
-    const stamp = header.readUInt32BE(12);
+    const deviceId = buf.readUInt32BE(8);
+    const stamp = buf.readUInt32BE(12);
 
     this.deviceId = deviceId;
     this.stamp = stamp;
-    console.log(msg.toString('hex'));
-
-    if (msg.length !== 32) {
+    // hello packet length is 32，other packet length is message
+    if (msg.length === 32) {
+      return { id: 1, result: ['ok'] };
+    } else {
       const decipher = this.decipher;
       const decrypted = Buffer.concat([decipher.update(buf.slice(32)), decipher.final()]);
-      // console.log(decrypted.toString());
       const resObj = JSON.parse(decrypted.toString());
-      const result = resObj.result;
-      console.log(result);
+      console.log(resObj);
+      return resObj;
     }
   }
 
@@ -154,13 +142,13 @@ class Yeelight {
   }
 
   async sendMessageAndWaitResponse(buf: Buffer, port: number, ip: string, timeout: number = 3000) {
-    const sendAndWait = async (): Promise<boolean> => {
+    const sendAndWait = async (): Promise<any> => {
       const res = await this.send(buf, port, ip);
       if (res) {
         return new Promise((resolve, _) => {
           this.socket.once('message', (msg, _remoteInfo) => {
-            this.handleMessage(msg);
-            resolve(true);
+            const ret = this.handleMessage(msg);
+            resolve(ret);
           });
         });
       } else {
@@ -168,10 +156,11 @@ class Yeelight {
       }
     };
 
-    const timing = (): Promise<boolean> => {
+    const timing = (): Promise<any> => {
       return new Promise((resolve, _) => {
         setTimeout(() => {
-          resolve(false);
+          const timeoutErr = { id: 1, error: { message: 'timeout', code: -1 } };
+          resolve(timeoutErr);
         }, timeout);
       });
     };
