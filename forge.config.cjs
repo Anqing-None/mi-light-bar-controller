@@ -1,7 +1,7 @@
 module.exports = {
   publishers: [
     {
-      name: 'https://github.com/Anqing-None',
+      name: '@electron-forge/publisher-github',
       config: {
         repository: {
           owner: 'Anqing-None',

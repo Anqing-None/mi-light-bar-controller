@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: 下载
-      link: /markdown-examples
+      link: https://github.com/Anqing-None/mi-light-bar-controller/releases
     - theme: alt
       text: 使用教程
       link: /tutorial

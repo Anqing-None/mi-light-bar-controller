@@ -4,7 +4,7 @@
   "type": "module",
   "description": "An Electron application for controlling Mi Light Bar",
   "main": "./out/main/index.js",
-  "author": "https://github.com/Anqing-None",
+  "author": "Anqing-None",
   "homepage": "https://anqing-none.github.io/mi-light-bar-controller/",
   "scripts": {
     "format": "prettier --write .",
