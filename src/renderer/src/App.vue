@@ -53,14 +53,14 @@
           <div class="w-full h-full p-4 flex flex-col items-center bg-gray-100 dark:bg-neutral-800 rounded-lg">
             <div class="form-control w-full">
               <label class="label justify-between cursor-pointer">
-                <span class="label-text">跟随电脑开启</span>
+                <span class="label-text">跟随软件开启</span>
                 <input v-model="isStartWithSystem" type="checkbox" class="toggle toggle-success" checked />
               </label>
             </div>
 
             <div class="form-control w-full">
               <label class="label cursor-pointer">
-                <span class="label-text">跟随电脑关闭</span>
+                <span class="label-text">跟随软件关闭</span>
                 <input v-model="isCloseWithSystem" type="checkbox" class="toggle toggle-success" checked />
               </label>
             </div>
